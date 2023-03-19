@@ -3,9 +3,10 @@
 #include"string.h"
 #include<conio.h>
 
-// 定义单链表节点数据类型,更换数据类型可以自行输入
+// 定义双向链表节点数据类型,更换数据类型可以自行输入
 typedef int Element;//当前为int
 typedef struct node {
+    struct node* front;
     Element el;          // 存储节点可改数据
     struct node* next;  // 存储下一节点地址
 }Node;
@@ -29,12 +30,15 @@ void add(LinkedList* list, Element el) {//输入头指针和需要添加的数据
     // 创建新节点
     Node* node = (Node*)malloc(sizeof(Node));
     node->el = el;
+    node->front = NULL;
     node->next = NULL;//将新建指针域赋值NULL
 
     if (list->head == NULL) {   // 链表为空，新节点是头节点，则以此为新建节点
         list->head = node;
+        node->front = NULL;
     }
     else {                    // 链表不为空，则将新节点添加到尾部
+        node->front = list->tail;
         list->tail->next = node;
     }
 
@@ -51,6 +55,7 @@ void insert(LinkedList* list, int index, Element el) {
         // 创建新节点
         Node* node = (Node*)malloc(sizeof(Node));
         node->el = el;
+        node->front = NULL;
         node->next = NULL;
 
         Node* p = list->head;    // 指向头节点
@@ -66,6 +71,7 @@ void insert(LinkedList* list, int index, Element el) {
             list->head = node;
         }
         else {
+            node->front = q;
             q->next = node;
             node->next = p;
         }
@@ -81,6 +87,7 @@ int removeNode(LinkedList* list, int index) {
         return -1;  // 返回-1表示删除失败
     }
     else {
+        
         Node* p = list->head;    // 指向头节点
         Node* q = NULL;         // 指向ptr前一个节点
 
@@ -89,45 +96,47 @@ int removeNode(LinkedList* list, int index) {
             p = p->next;
         }
 
-        if (q == NULL) {         // 删除头节点
+        if (q == NULL) {               // 删除头节点
             list->head = p->next;
+            p->next->front = NULL;
         }
         else {
             q->next = p->next;
+            p->next->front = q;
         }
 
-        if (p == list->tail) {    // 删除尾节点
+        if (p == list->tail) {       // 删除尾节点
             list->tail = q;
         }
 
-        int data = p->el;       // 获取待删除节点数据
+        int data = p->el;          // 获取待删除节点数据
         free(p);                  // 释放待删除节点
         list->size--;
-
+        printf("\n%d\n",data);
         return data;    // 返回待删除节点数据
     }
 }
 
 // 获取链表指定位置节点数据
 int get(LinkedList* list, int index) {
-    if (index < 0 || index >= list->size) {   // index越界，输出公告并返回-1
+    if (index < 0 || index >= list->size) {          // index越界，输出公告并返回-1
         printf("节点数越界，请输入正确的节点数");
         return -1;
     }
     else {
-        Node* p = list->head;    // 指向头节点
+        Node* p = list->head;                       // 指向头节点
 
         for (int i = 0; i < index-1; i++) {
             p = p->next;
         }
 
-        return p->el;   // 返回指定位置节点数据
+        return p->el;                               // 返回指定位置节点数据
     }
 }
 //修改节点数据
 void Modify(LinkedList* list, int index, Element el)
-{
-    if (index < 0 || index >= list->size) {          // index越界，输出公告并返回
+    {
+    if (index < 0 || index >= list->size) {          // index越界，输出公告并返回-1
         printf("节点数越界，请输入正确的节点数");
         return;
     }
@@ -138,7 +147,7 @@ void Modify(LinkedList* list, int index, Element el)
         }
         p->el = el;
         printf("\n已修改完成\n");
-        return;                            
+        return;                               // 返回指定位置节点数据
     }
 }
 // 打印输出链表全部数据
@@ -147,10 +156,10 @@ void printList(LinkedList* list) {
 
     printf("\nList: ");
     while (p != NULL) {
-        printf("%d ", p->el);//输出类型自行修改，由自己定义，此处为int
+        printf("%d ", p->el);                    //输出类型自行修改，由自己定义，此处为int
         p = p->next;
     }
-    printf("\n当前节点数为：\n%d\n",list->size);
+    printf("\n当前节点数为：\n%d\n", list->size);
 }
 //操作菜单
 void Menu()
@@ -185,7 +194,7 @@ int main() {
     char c = '0';
     do
     {
-        printf("\n如果需要数据输入或查找,删除，请输入所需\n节点数+空格+输入的数据+回车\n，不需使用的数据请请输入0\n");
+        printf("\n如果需要数据输入或查找,删除，请输入所需\n第几个节点数+空格+输入的数据+回车\n，不需使用的数据请请输入0\n");
         scanf_s("%d %d", &i, &el);                 //当链表数据类型发生变化时，此处需修改输入类型
         Menu();
         printf("\n请选择你需要的操作\n");
@@ -207,10 +216,10 @@ int main() {
         case 'e':printf("The %drd element is: %d\n\n", i, get(&list, 2));    // 获取节点数据
             break;
         case 'F':
-        case 'f':Modify(&list, i, el);
+        case 'f':Modify(&list, i, el);    // 获取节点数据
             break;
         }
     } while (c != ' ');
 
-        return 0;
-    }
+    return 0;
+}
